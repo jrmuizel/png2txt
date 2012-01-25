@@ -67,10 +67,10 @@ void read_png_file(char* file_name)
 
 	png_read_info(png_ptr, info_ptr);
 
-	width = info_ptr->width;
-	height = info_ptr->height;
-	color_type = info_ptr->color_type;
-	bit_depth = info_ptr->bit_depth;
+	width = png_get_image_width(png_ptr, info_ptr);
+	height = png_get_image_height(png_ptr, info_ptr);
+	color_type = png_get_color_type(png_ptr, info_ptr);
+	bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
 	number_of_passes = png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr, info_ptr);
@@ -82,7 +82,7 @@ void read_png_file(char* file_name)
 
 	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
 	for (y=0; y<height; y++)
-		row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+		row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr, info_ptr));
 
 	png_read_image(png_ptr, row_pointers);
 
@@ -149,8 +149,9 @@ void write_png_file(char* file_name)
 
 void process_file(void)
 {
-	if (info_ptr->color_type != PNG_COLOR_TYPE_RGBA)
-		abort_("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGBA (is %d)", info_ptr->color_type);
+	if (png_get_color_type(png_ptr, info_ptr) != PNG_COLOR_TYPE_RGBA)
+		abort_("[process_file] color_type of input file must be PNG_COLOR_TYPE_RGBA (is %d)",
+		       png_get_color_type(png_ptr, info_ptr));
 
 	for (y=0; y<height; y++) {
 		png_byte* row = row_pointers[y];
